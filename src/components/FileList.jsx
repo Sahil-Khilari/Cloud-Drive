@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import { db, storage } from '../firebase';
+import ShareFile from './ShareFile';
 
 function FileList({ user }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [shareModalFile, setShareModalFile] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -44,8 +46,8 @@ function FileList({ user }) {
     }
 
     try {
-      // Delete from Storage
-      const fileRef = ref(storage, file.url);
+  // Delete from Storage - prefer stored path when available; ref can take a path or URL
+  const fileRef = ref(storage, file.path || file.url);
       await deleteObject(fileRef);
 
       // Delete from Firestore
@@ -107,6 +109,13 @@ function FileList({ user }) {
               </div>
 
               <div className="file-actions">
+                <button
+                  onClick={() => setShareModalFile(file)}
+                  className="btn btn-small btn-share"
+                  title="Share file"
+                >
+                  Share
+                </button>
                 <a
                   href={file.url}
                   target="_blank"
@@ -126,6 +135,14 @@ function FileList({ user }) {
             </div>
           ))}
         </div>
+      )}
+
+      {shareModalFile && (
+        <ShareFile
+          file={shareModalFile}
+          user={user}
+          onClose={() => setShareModalFile(null)}
+        />
       )}
     </div>
   );

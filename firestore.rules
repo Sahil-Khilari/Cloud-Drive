@@ -19,5 +19,29 @@ service cloud.firestore {
       allow update: if request.auth != null && 
                       request.auth.uid == resource.data.userId;
     }
+
+    // Shares collection
+    match /shares/{shareId} {
+      // Allow read if user is the owner or recipient (compare using stored lowercase fields)
+      allow read: if request.auth != null &&
+                    (
+                      (request.auth.token.email != null && lower(request.auth.token.email) == resource.data.ownerEmailLower) ||
+                      (request.auth.token.email != null && lower(request.auth.token.email) == resource.data.recipientEmailLower)
+                    );
+
+      // Allow create if user is authenticated and is the owner (email must match)
+  allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.ownerId &&
+          request.auth.token.email != null &&
+          request.auth.token.email == request.resource.data.ownerEmail &&
+          request.resource.data.ownerEmailLower == lower(request.resource.data.ownerEmail) &&
+          request.resource.data.recipientEmailLower == lower(request.resource.data.recipientEmail) &&
+          // Enforce Gmail-only recipients
+          request.resource.data.recipientEmailLower.matches('^[A-Za-z0-9._%+-]+@gmail\\.com$');
+
+      // Allow delete if user is the owner
+      allow delete: if request.auth != null &&
+                      request.auth.uid == resource.data.ownerId;
+    }
   }
 }

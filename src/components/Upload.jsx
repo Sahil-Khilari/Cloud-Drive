@@ -61,6 +61,7 @@ function Upload({ user }) {
           await addDoc(collection(db, 'files'), {
             name: file.name,
             url: downloadURL,
+            path: uploadTask.snapshot.ref.fullPath,
             size: file.size,
             type: file.type,
             userId: user.uid,

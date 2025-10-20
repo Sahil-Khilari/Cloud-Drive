@@ -5,6 +5,7 @@ import { auth } from './firebase';
 import Auth from './components/Auth';
 import Upload from './components/Upload';
 import FileList from './components/FileList';
+import SharedFiles from './components/SharedFiles';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
                   <div className="dashboard">
                     <Upload user={user} />
                     <FileList user={user} />
+                    <SharedFiles user={user} />
                   </div>
                 </ProtectedRoute>
               }
